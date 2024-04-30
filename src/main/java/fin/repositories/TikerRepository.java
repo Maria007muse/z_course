@@ -1,8 +1,10 @@
-package fin.dto;
-
+package fin.repositories;
+import fin.models.Tiker;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DealsRepository extends CrudRepository<Deals, Long> {
+public interface TikerRepository extends CrudRepository<Tiker, Long> {
+
 }
+

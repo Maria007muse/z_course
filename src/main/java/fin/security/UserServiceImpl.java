@@ -1,13 +1,17 @@
 package fin.security;
 
 
+import fin.dto.*;
+import fin.models.Role;
+import fin.models.User;
+import fin.repositories.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import fin.data.*;
+
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,43 +21,27 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-   private UserRepository userRepository;
-   private BCryptPasswordEncoder passwordEncoder;
+    private UserRepository userRepository;
+    private BCryptPasswordEncoder passwordEncoder;
 
-   public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
-      super();
-      this.userRepository = userRepository;
-      this.passwordEncoder = passwordEncoder;
-   }
-
-   @Override
-   public User save(UserRegistrationDto registrationDto) {
-      var user = new User(
-              registrationDto.getUserName(),
-                 registrationDto.getFullName(),
-                  registrationDto.getStreet(),
-                   registrationDto.getCity(),
-                   registrationDto.getZip(),
-                   registrationDto.getPhoneNumber(),
-                   passwordEncoder.encode(registrationDto
-                          .getPassword()),
-                   Arrays.asList(new Role("ROLE_USER")));
-
-      return userRepository.save(user);
-   }
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        super();
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
-    public User saveAdmin(AdminRegistrationDto adminDto) {
-        User admin = new User(
-                adminDto.getUserName(),
-                adminDto.getFullName(),
-                adminDto.getStreet(),
-                adminDto.getCity(),
-                adminDto.getZip(),
-                adminDto.getPhoneNumber(),
-                passwordEncoder.encode(adminDto.getPassword()),
-                Arrays.asList(new Role("ROLE_ADMIN")));
-        return userRepository.save(admin);
+    public User save(UserRegistrationDto registrationDto) {
+        Role role = new Role(registrationDto.getRole());
+        var user = new User(
+                registrationDto.getUserName(),
+                registrationDto.getFullName(),
+                registrationDto.getCity(),
+                registrationDto.getPhoneNumber(),
+                passwordEncoder.encode(registrationDto.getPassword()),
+                Arrays.asList(role));
+
+        return userRepository.save(user);
     }
 
 
@@ -74,14 +62,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private Collection<? extends GrantedAuthority>
-          mapRolesToAuthorities(Collection<Role> roles) {
-      return roles.stream()
-            .map(role -> new SimpleGrantedAuthority
-                  (role.getName()))
-            .collect(Collectors.toList());
-   }
-   @Override
-   public List<User> getAll() {
-      return userRepository.findAll();
-   }
+    mapRolesToAuthorities(Collection<Role> roles) {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority
+                        (role.getName()))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<User> getAll() {
+        return userRepository.findAll();
+    }
 }
